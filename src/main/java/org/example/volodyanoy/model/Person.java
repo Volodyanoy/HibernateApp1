@@ -1,9 +1,6 @@
 package org.example.volodyanoy.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "Person")
@@ -11,16 +8,20 @@ public class Person {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_generator_person")
+    //@SequenceGenerator(name="seq_generator_person", sequenceName = "person_id_seq", allocationSize = 1)
     private int id;
+
     @Column(name = "name")
     private String name;
+
     @Column(name = "age")
     private int age;
 
     public Person() {}
 
-    public Person(int id, String name, int age) {
-        this.id = id;
+    public Person(String name, int age) {
         this.name = name;
         this.age = age;
     }
