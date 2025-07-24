@@ -1,37 +1,69 @@
 package org.example.volodyanoy;
 
-import org.example.volodyanoy.model.Passport;
-import org.example.volodyanoy.model.Person;
+import org.example.volodyanoy.model.Actor;
+import org.example.volodyanoy.model.Movie;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-/**
- * Hello world!
- *
- */
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+
 public class App 
 {
     public static void main( String[] args )
     {
-        Configuration configuration = new Configuration()
-                .addAnnotatedClass(Person.class).addAnnotatedClass(Passport.class);
-        SessionFactory sessionFactory = configuration.buildSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
+        Configuration configuration = new Configuration().addAnnotatedClass(Actor.class).
+                addAnnotatedClass(Movie.class);
 
-        try {
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+
+        try (sessionFactory) {
+            Session session = sessionFactory.getCurrentSession();
             session.beginTransaction();
 
-            Person person = session.get(Person.class, 2);
-            session.remove(person);
+            // Many to many
+            /*Удаляем у актера фильм, а у фильма актера
+             (Предположим, что на самом деле актер не снимался в данном фильме)
+            Actor actor = session.get(Actor.class, 2);
+            System.out.println(actor.getMovies());
+            Movie movieToRemove = actor.getMovies().get(0);
+            actor.getMovies().remove(0);
+            movieToRemove.getActors().remove(actor);*/
+            /*Создаем фильм, указываем актера. Этому же актеру добавляем новый фильм
+            Movie movie = new Movie("Reservoir Dogs", 1992);
+            Actor actor = session.get(Actor.class, 1);
+            movie.setActors(new ArrayList<>(Collections.singletonList(actor)));
+            actor.getMovies().add(movie);
+            session.save(movie);*/
+            /*Выведем актеров фильма
+            Movie movie = session.get(Movie.class, 1);
+            System.out.println(movie.getActors());*/
+            /*Выведем фильм, в котором снимался выбранный актер
+            Actor actor = session.get(Actor.class, 1);
+            System.out.println(actor.getMovies());*/
+            /* Создаем фильм и два актера
+            Movie movie = new Movie("Pulp fiction", 1994);
+            Actor actor1 = new Actor("Harvey Keitel", 81);
+            Actor actor2 = new Actor("Samuel L Jacjson", 72);
+
+            movie.setActors(new ArrayList<>(List.of(actor1, actor2)));
+            actor1.setMovies(new ArrayList<>(Collections.singletonList(movie)));
+            actor2.setMovies(new ArrayList<>(Collections.singletonList(movie)));
+
+            session.save(movie);
+            session.save(actor1);
+            session.save(actor2);*/
 
             //One to one добавление объектов в БД
             /*Person person = new Person("Test person", 30);
             Passport passport = new Passport(12345);
             person.setPassport(passport);
             session.save(person);*/
-
-
+            /*Person person = session.get(Person.class, 2);
+            session.remove(person);*/
             //One to many + Cascade
             /*Person person = new Person("Test cascading", 30);
             person.addItem(new Item("Test cascading item1"));
@@ -89,9 +121,6 @@ public class App
             System.out.println(items);*/
 
             session.getTransaction().commit();
-
-        } finally {
-            sessionFactory.close();
         }
 
     }
