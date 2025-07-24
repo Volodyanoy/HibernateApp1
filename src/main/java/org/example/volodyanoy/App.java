@@ -26,7 +26,17 @@ public class App
 
         try {
             session.beginTransaction();
+            Person person = new Person("Test cascading", 30);
+            person.addItem(new Item("Test cascading item1"));
+            person.addItem(new Item("Test cascading item2"));
+            person.addItem(new Item("Test cascading item3"));
 
+            session.save(person);
+
+            //Метод persist
+            //session.persist(person); // т.к. настроено каскадирование Persist, то session.persist(item) сделает за нас Hibernate
+
+            //Различные операции с данными с помощью Hibernate
             //Меняем владельца у товара
             /*Person person = session.get(Person.class, 4);
             Item item = session.get(Item.class, 1);
