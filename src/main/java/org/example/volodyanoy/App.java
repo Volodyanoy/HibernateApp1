@@ -1,28 +1,50 @@
 package org.example.volodyanoy;
 
-import org.example.volodyanoy.model.Actor;
-import org.example.volodyanoy.model.Movie;
+import org.example.volodyanoy.model.Item;
+import org.example.volodyanoy.model.Person;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
-public class App 
+public class App
 {
     public static void main( String[] args )
     {
-        Configuration configuration = new Configuration().addAnnotatedClass(Actor.class).
-                addAnnotatedClass(Movie.class);
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class).addAnnotatedClass(Item.class);
 
         SessionFactory sessionFactory = configuration.buildSessionFactory();
 
         try (sessionFactory) {
             Session session = sessionFactory.getCurrentSession();
             session.beginTransaction();
+
+            Person person = session.get(Person.class, 1);
+            System.out.println("Получили человека из таблицы");
+
+
+            //Hibernate.initialize(person.getItems()); // Подгружаем связанные ленивые сущности
+
+            session.getTransaction().commit(); //Также Hibernate автоматически вызывается session.close()
+
+            System.out.println("Сессия закончилась (session.close)");
+
+            //Открываем сессию и транзакцию еще раз (в любом другом месте кода)
+            session = sessionFactory.getCurrentSession();
+            session.beginTransaction();
+            System.out.println("Внутри второй транзакции");
+            person = (Person) session.merge(person);
+
+            //Hibernate.initialize(person.getItems());
+            List<Item> items = session.createQuery("select i from Item i where i.owner.id=:personId", Item.class).setParameter("personId", person.getId()).getResultList();
+            System.out.println(items);
+            session.getTransaction().commit();
+
+            System.out.println("Вне второй сессии");
 
             // Many to many
             /*Удаляем у актера фильм, а у фильма актера
@@ -99,7 +121,6 @@ public class App
             session.save(person);
             session.save(newItem);*/
 
-
             //Добавление нового товара для человека. Добавляем в person новый товар,
             // т.к. в кэше Hibernate может быть старая версия person
             /*Person person = session.get(Person.class, 2);
@@ -120,7 +141,6 @@ public class App
             List<Item> items = person.getItems();
             System.out.println(items);*/
 
-            session.getTransaction().commit();
         }
 
     }
